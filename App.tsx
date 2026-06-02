@@ -7,6 +7,7 @@ import {
   StyleSheet,
   StatusBar,
   Platform,
+  TouchableOpacity,
 } from "react-native";
 import { TabBar, TabId } from "./src/components";
 import { colors, spacing, radius } from "./src/theme";
@@ -20,6 +21,20 @@ import ExponentialScreen from "./src/screens/ExponentialScreen";
 import PorcentagemScreen from "./src/screens/PorcentagemScreen";
 import Regra3Screen from "./src/screens/Regra3Screen";
 import CalculatorScreen from "./src/screens/CalculatorScreen";
+import Sparkles from "./src/assets/svg/sparkles";
+import ChatModal from "./src/screens/ChatModal";
+
+const TAB_CONTEXT: Record<TabId, string> = {
+  calc: "O usuário está usando a calculadora básica com expressões matemáticas.",
+  linear: "O usuário está resolvendo equações de 1º grau (ax + b = c).",
+  quad: "O usuário está resolvendo equações de 2º grau (Bhaskara): ax² + bx + c = 0.",
+  sistema: "O usuário está resolvendo sistemas de equações lineares 2×2.",
+  pa: "O usuário está trabalhando com Progressões Aritméticas (PA).",
+  pg: "O usuário está trabalhando com Progressões Geométricas (PG).",
+  exp: "O usuário está resolvendo equações exponenciais.",
+  porcent: "O usuário está calculando porcentagens.",
+  regra3: "O usuário está aplicando regra de três simples.",
+};
 
 const SCREENS: Record<
   TabId,
@@ -39,6 +54,7 @@ const SCREENS: Record<
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("calc");
   const scrollRef = useRef<React.ElementRef<typeof ScrollView> | null>(null);
+  const [chatVisible, setChatVisible] = useState(false);
 
   const handleShowResult = () => {
     requestAnimationFrame(() => {
@@ -69,6 +85,19 @@ export default function App() {
         {SCREENS[activeTab]({ onShowResult: handleShowResult })}
         <View style={{ height: spacing.xxl }} />
       </ScrollView>
+
+      <TouchableOpacity
+        style={styles.cornerDot}
+        onPress={() => setChatVisible(true)}
+      >
+        <Sparkles color="white" />
+      </TouchableOpacity>
+
+      <ChatModal
+        visible={chatVisible}
+        onClose={() => setChatVisible(false)}
+        mathContext={TAB_CONTEXT[activeTab]}
+      />
     </SafeAreaView>
   );
 }
@@ -115,5 +144,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
+  },
+  cornerDot: {
+    position: "absolute",
+    padding: spacing.md,
+    backgroundColor: colors.primary,
+    borderRadius: 9999,
+    bottom: spacing.lg,
+    right: spacing.lg,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 3,
+    borderColor: colors.border,
   },
 });
