@@ -21,7 +21,7 @@ interface InputFieldProps {
 }
 
 const screenWidth = Dimensions.get("window").width;
-const BUTTON_FONT_SIZE = Math.min(16, Math.max(12, screenWidth * 0.03));
+const BUTTON_FONT_SIZE = Math.min(16, Math.max(12, screenWidth * 0.050));
 
 export function InputField({
   label,

@@ -8,7 +8,6 @@ type ScreenProps = {
   onShowResult?: () => void;
 };
 
-const PRESET_EXPRESSIONS = ["10+5", "25-7", "8×7", "56÷8"];
 const BUTTON_ROWS = [
   ["7", "8", "9", "÷"],
   ["4", "5", "6", "×"],
@@ -67,18 +66,6 @@ export default function CalculatorScreen({ onShowResult }: ScreenProps) {
       <SectionCard label="Calculadora básica">
         <View style={styles.displayCard}>
           <Text style={styles.displayExpression}>{expression}</Text>
-        </View>
-
-        <View style={styles.presets}>
-          {PRESET_EXPRESSIONS.map((item) => (
-            <Btn
-              key={item}
-              label={item}
-              variant="secondary"
-              onPress={() => handlePreset(item)}
-              flex={1}
-            />
-          ))}
         </View>
 
         <View style={styles.buttonGrid}>
