@@ -12,6 +12,7 @@ import {
   Modal,
 } from "react-native";
 import { colors, spacing, radius, typography } from "../theme";
+import ChatBotIcon from "../assets/svg/chatbot";
 
 interface Message {
   id: string;
@@ -36,7 +37,7 @@ function nowTime() {
 const INITIAL_MSG: Message = {
   id: "0",
   role: "assistant",
-  text: "Olá! 👋 Sou seu assistente de matemática. Pode me perguntar sobre qualquer cálculo feito aqui no app, ou tirar dúvidas sobre matemática em geral!",
+  text: "Olá!, Sou seu assistente de matemática. Pode me perguntar sobre qualquer cálculo feito aqui no app, ou tirar dúvidas sobre matemática em geral!",
   time: nowTime(),
 };
 
@@ -82,8 +83,8 @@ export default function ChatModal({
   - Não invente respostas.
   - Mostre os cálculos.
   - Seja adequado para estudantes.
-  ` + (mathContext ? `\n\nContexto atual do app: ${mathContext}` : ""); 
-  
+  ` + (mathContext ? `\n\nContexto atual do app: ${mathContext}` : "");
+
     try {
       const response = await fetch(
         "https://solver-equacoes.vercel.app/api/chat",
@@ -144,10 +145,11 @@ export default function ChatModal({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.container}>
-          {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <View style={styles.avatarDot} />
+              <View style={styles.avatarDot}>
+                <ChatBotIcon color="#FFFFFF" />
+              </View>
               <View>
                 <Text style={styles.headerTitle}>Assistente IA</Text>
                 <Text style={styles.headerSub}>Matemática passo a passo</Text>
@@ -158,14 +160,12 @@ export default function ChatModal({
             </TouchableOpacity>
           </View>
 
-          {/* Context pill */}
           {mathContext && (
             <View style={styles.contextPill}>
-              <Text style={styles.contextText}>📐 Contexto: {mathContext}</Text>
+              <Text style={styles.contextText}>Contexto: {mathContext}</Text>
             </View>
           )}
 
-          {/* Messages */}
           <ScrollView
             ref={scrollRef}
             style={styles.messages}
@@ -217,7 +217,6 @@ export default function ChatModal({
             )}
           </ScrollView>
 
-          {/* Input */}
           <View style={styles.inputArea}>
             <TextInput
               style={styles.input}
@@ -279,8 +278,9 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     backgroundColor: colors.primary,
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 16,
