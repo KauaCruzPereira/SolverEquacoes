@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Btn, ResultBox, SectionCard } from "../components";
 import { solveCalculator, SolverResult } from "../solvers";
 import { colors, radius, spacing, typography } from "../theme";
+
+type ScreenProps = {
+  onShowResult?: () => void;
+};
 
 const PRESET_EXPRESSIONS = ["10+5", "25-7", "8×7", "56÷8"];
 const BUTTON_ROWS = [
@@ -12,9 +16,13 @@ const BUTTON_ROWS = [
   ["0", ".", "(", ")", "+"],
 ];
 
-export default function CalculatorScreen() {
+export default function CalculatorScreen({ onShowResult }: ScreenProps) {
   const [expression, setExpression] = useState("0");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   const append = (value: string) => {
     setExpression((prev) => {

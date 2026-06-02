@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { InputField, Btn, ResultBox, SectionCard } from "../components";
 import { solvePA, SolverResult } from "../solvers";
 
-export default function PAScreen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function PAScreen({ onShowResult }: ScreenProps) {
   const [a1, setA1] = useState("2");
   const [r, setR] = useState("3");
   const [n, setN] = useState("6");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   return (
     <View style={styles.container}>

@@ -1,14 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { InputField, Btn, ResultBox, SectionCard } from "../components";
 import { solveQuadratic, SolverResult } from "../solvers";
 import { colors, spacing } from "../theme";
 
-export default function QuadraticScreen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function QuadraticScreen({ onShowResult }: ScreenProps) {
   const [a, setA] = useState("1");
   const [b, setB] = useState("-5");
   const [c, setC] = useState("6");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   const preview = () => {
     const bv = parseFloat(b);

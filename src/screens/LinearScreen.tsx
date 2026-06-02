@@ -1,14 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { InputField, Btn, ResultBox, SectionCard } from "../components";
 import { solveLinear, SolverResult } from "../solvers";
 import { colors, spacing } from "../theme";
 
-export default function LinearScreen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function LinearScreen({ onShowResult }: ScreenProps) {
   const [a, setA] = useState("2");
   const [b, setB] = useState("3");
   const [c, setC] = useState("11");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   const preview = () => {
     const av = a || "a";

@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput } from "react-native";
 import { Btn, ResultBox, SectionCard } from "../components";
 import { solveRegra3, SolverResult } from "../solvers";
 import { colors, spacing, radius } from "../theme";
 
-export default function Regra3Screen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function Regra3Screen({ onShowResult }: ScreenProps) {
   const [a, setA] = useState("4");
   const [b, setB] = useState("10");
   const [c, setC] = useState("6");
   const [x, setX] = useState("");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   const solve = (tipo: "dir" | "inv") => {
     const r = solveRegra3(parseFloat(a), parseFloat(b), parseFloat(c), tipo);

@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { InputField, Btn, ResultBox, SectionCard } from "../components";
 import { solvePG, SolverResult } from "../solvers";
 
-export default function PGScreen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function PGScreen({ onShowResult }: ScreenProps) {
   const [a1, setA1] = useState("3");
   const [q, setQ] = useState("2");
   const [n, setN] = useState("5");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   return (
     <View style={styles.container}>

@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput } from "react-native";
 import { Btn, ResultBox, SectionCard } from "../components";
 import { solvePorcentagem, SolverResult } from "../solvers";
 import { colors, spacing, radius } from "../theme";
 
-export default function PorcentagemScreen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function PorcentagemScreen({ onShowResult }: ScreenProps) {
   const [val, setVal] = useState("250");
   const [pct, setPct] = useState("15");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   return (
     <View style={styles.container}>

@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { InputField, Btn, ResultBox, SectionCard } from "../components";
 import { solveExponential, SolverResult } from "../solvers";
 import { colors, spacing } from "../theme";
 
-export default function ExponentialScreen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function ExponentialScreen({ onShowResult }: ScreenProps) {
   const [a, setA] = useState("2");
   const [b, setB] = useState("32");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   return (
     <View style={styles.container}>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import {
   InputField,
@@ -10,7 +10,11 @@ import {
 import { solveSistema, SolverResult } from "../solvers";
 import { colors, spacing } from "../theme";
 
-export default function SistemaScreen() {
+type ScreenProps = {
+  onShowResult?: () => void;
+};
+
+export default function SistemaScreen({ onShowResult }: ScreenProps) {
   const [a1, setA1] = useState("2");
   const [b1, setB1] = useState("1");
   const [c1, setC1] = useState("5");
@@ -18,6 +22,10 @@ export default function SistemaScreen() {
   const [b2, setB2] = useState("-1");
   const [c2, setC2] = useState("3");
   const [result, setResult] = useState<SolverResult | null>(null);
+
+  useEffect(() => {
+    if (result) onShowResult?.();
+  }, [result, onShowResult]);
 
   return (
     <View style={styles.container}>

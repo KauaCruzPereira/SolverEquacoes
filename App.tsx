@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -21,20 +21,30 @@ import PorcentagemScreen from "./src/screens/PorcentagemScreen";
 import Regra3Screen from "./src/screens/Regra3Screen";
 import CalculatorScreen from "./src/screens/CalculatorScreen";
 
-const SCREENS: Record<TabId, React.ReactNode> = {
-  calc: <CalculatorScreen />,
-  linear: <LinearScreen />,
-  quad: <QuadraticScreen />,
-  sistema: <SistemaScreen />,
-  pa: <PAScreen />,
-  pg: <PGScreen />,
-  exp: <ExponentialScreen />,
-  porcent: <PorcentagemScreen />,
-  regra3: <Regra3Screen />,
+const SCREENS: Record<
+  TabId,
+  (props: { onShowResult?: () => void }) => React.ReactNode
+> = {
+  calc: (props) => <CalculatorScreen {...props} />,
+  linear: (props) => <LinearScreen {...props} />,
+  quad: (props) => <QuadraticScreen {...props} />,
+  sistema: (props) => <SistemaScreen {...props} />,
+  pa: (props) => <PAScreen {...props} />,
+  pg: (props) => <PGScreen {...props} />,
+  exp: (props) => <ExponentialScreen {...props} />,
+  porcent: (props) => <PorcentagemScreen {...props} />,
+  regra3: (props) => <Regra3Screen {...props} />,
 };
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("calc");
+  const scrollRef = useRef<React.ElementRef<typeof ScrollView> | null>(null);
+
+  const handleShowResult = () => {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -50,12 +60,13 @@ export default function App() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {SCREENS[activeTab]}
+        {SCREENS[activeTab]({ onShowResult: handleShowResult })}
         <View style={{ height: spacing.xxl }} />
       </ScrollView>
     </SafeAreaView>
