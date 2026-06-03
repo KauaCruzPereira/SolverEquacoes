@@ -25,11 +25,7 @@ export default function CalculatorScreen({ onShowResult }: ScreenProps) {
 
   const append = (value: string) => {
     setExpression((prev) => {
-      if (
-        prev === "0" &&
-        value !== "." &&
-        !["+", "-", "×", "÷", "(", ")"].includes(value)
-      ) {
+      if (prev === "0" && value !== "." && !["×", "÷", ")"].includes(value)) {
         return value;
       }
       return prev + value;

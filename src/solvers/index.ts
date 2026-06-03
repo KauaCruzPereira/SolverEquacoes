@@ -291,23 +291,361 @@ export function solveCalculator(expression: string): SolverResult {
     };
   }
 
+  type NumNode = { type: "number"; value: number; grouped?: boolean };
+  type OpNode = {
+    type: "op";
+    op: string;
+    left: Node;
+    right: Node;
+    grouped?: boolean;
+  };
+  type UnaryNode = {
+    type: "unary";
+    op: "+" | "-";
+    operand: Node;
+    grouped?: boolean;
+  };
+  type Node = NumNode | OpNode | UnaryNode;
+
+  function tokenize(s: string): string[] {
+    const tokens: string[] = [];
+    let i = 0;
+    const isUnaryContext = () =>
+      tokens.length === 0 ||
+      tokens[tokens.length - 1] === "(" ||
+      /[+\-*/]/.test(tokens[tokens.length - 1]);
+
+    while (i < s.length) {
+      const ch = s[i];
+      if (ch === " ") {
+        i++;
+        continue;
+      }
+      if ((ch === "+" || ch === "-") && isUnaryContext()) {
+        let sign = 1;
+        while (i < s.length && (s[i] === "+" || s[i] === "-")) {
+          if (s[i] === "-") sign *= -1;
+          i++;
+        }
+        if (i < s.length && /[0-9.]/.test(s[i])) {
+          let j = i;
+          while (j < s.length && /[0-9.]/.test(s[j])) j++;
+          const number = s.slice(i, j);
+          tokens.push(sign < 0 ? `-${number}` : number);
+          i = j;
+          continue;
+        }
+        if (i < s.length && s[i] === "(") {
+          if (sign < 0) {
+            tokens.push("-");
+          }
+          continue;
+        }
+      }
+      if (/[0-9.]/.test(ch)) {
+        let j = i;
+        while (j < s.length && /[0-9.]/.test(s[j])) j++;
+        tokens.push(s.slice(i, j));
+        i = j;
+        continue;
+      }
+      if (/[+\-*/()]/.test(ch)) {
+        tokens.push(ch);
+        i++;
+        continue;
+      }
+      i++;
+    }
+    return tokens;
+  }
+
+  function precedence(op: string) {
+    if (op === "+" || op === "-") return 1;
+    if (op === "*" || op === "/") return 2;
+    return 0;
+  }
+
+  function formatNodeExpr(n: Node): string {
+    if (n.type === "number") {
+      return n.value < 0 ? `(${fmt(n.value)})` : fmt(n.value);
+    }
+    return treeToString(n);
+  }
+
+  function parseExpression(tokens: string[]): Node {
+    let pos = 0;
+
+    const peek = () => tokens[pos];
+    const next = () => tokens[pos++];
+
+    function parseFactor(): Node {
+      const token = peek();
+      if (token === "+" || token === "-") {
+        const sign = next();
+        const node = parseFactor();
+        if (sign === "-") {
+          if (node.type === "number") {
+            return { type: "number", value: -node.value };
+          }
+          return { type: "unary", op: "-", operand: node };
+        }
+        return node;
+      }
+
+      if (token === "(") {
+        next();
+        const node = parseExpr();
+        if (peek() !== ")") throw new Error("Missing closing parenthesis");
+        next();
+        return { ...node, grouped: true };
+      }
+
+      if (/^-?[0-9]+(?:\.[0-9]+)?$/.test(token)) {
+        next();
+        return { type: "number", value: parseFloat(token) };
+      }
+
+      throw new Error("Expressão inválida.");
+    }
+
+    function parseTerm(): Node {
+      let node = parseFactor();
+      while (peek() === "*" || peek() === "/") {
+        const op = next();
+        const right = parseFactor();
+        node = { type: "op", op, left: node, right };
+      }
+      return node;
+    }
+
+    function parseExpr(): Node {
+      let node = parseTerm();
+      while (peek() === "+" || peek() === "-") {
+        const op = next();
+        const right = parseTerm();
+        node = { type: "op", op, left: node, right };
+      }
+      return node;
+    }
+
+    const root = parseExpr();
+    if (pos < tokens.length) throw new Error("Expressão inválida.");
+    return root;
+  }
+
+  function treeToString(n: Node): string {
+    if (n.type === "number") return formatNodeExpr(n);
+    if (n.type === "unary") {
+      const operand = n.operand;
+      const operandStr =
+        operand.type === "op" || operand.type === "unary"
+          ? `(${treeToString(operand)})`
+          : formatNodeExpr(operand);
+      return n.op === "-" ? `-${operandStr}` : `+${operandStr}`;
+    }
+    const left = n.left;
+    const right = n.right;
+    const leftStr =
+      left.type === "op" && precedence(left.op) < precedence(n.op)
+        ? `(${treeToString(left)})`
+        : formatNodeExpr(left);
+    let rightStr =
+      right.type === "op" &&
+      (precedence(right.op) < precedence(n.op) ||
+        (n.op === "/" && right.type === "op"))
+        ? `(${treeToString(right)})`
+        : formatNodeExpr(right);
+    if (n.op === "-" && right.type === "number" && right.value < 0) {
+      rightStr = `(${fmt(right.value)})`;
+    }
+    if (n.op === "/" && right.type === "number" && right.value < 0) {
+      rightStr = `(${fmt(right.value)})`;
+    }
+    const sym = n.op === "*" ? "×" : n.op === "/" ? "÷" : n.op;
+    return `${leftStr} ${sym} ${rightStr}`;
+  }
+
+  function compute(op: string, a: number, b: number): number {
+    if (op === "+") return a + b;
+    if (op === "-") return a - b;
+    if (op === "*") return a * b;
+    if (op === "/") return a / b;
+    throw new Error("op");
+  }
+
+  function opName(op: string) {
+    if (op === "+") return "Somar";
+    if (op === "-") return "Subtrair";
+    if (op === "*") return "Multiplicar";
+    if (op === "/") return "Dividir";
+    return "Operação";
+  }
+
+  function signRuleInfo(
+    op: string,
+    a: number,
+    b: number,
+    subExpr: string,
+  ):
+    | {
+        identifyTitle: string;
+        identifyText: string;
+        ruleTitle: string;
+        ruleText: string;
+        original: string;
+        transformed: string;
+        computeTitle: string;
+        computeOp: string;
+        computeA: number;
+        computeB: number;
+      }
+    | undefined {
+    if (op === "-" && b < 0) {
+      return {
+        identifyTitle: "Identificar sinais",
+        identifyText:
+          "Identificar que existe uma subtração de número negativo.",
+        ruleTitle: "Aplicar a regra dos sinais",
+        ruleText: "a - (-b) = a + b",
+        original: subExpr,
+        transformed: `${fmt(a)} + ${fmt(Math.abs(b))}`,
+        computeTitle: "Efetuar a soma",
+        computeOp: "+",
+        computeA: a,
+        computeB: Math.abs(b),
+      };
+    }
+    if (op === "+" && b < 0) {
+      return {
+        identifyTitle: "Identificar sinais",
+        identifyText: "Identificar que existe uma soma com número negativo.",
+        ruleTitle: "Aplicar a regra dos sinais",
+        ruleText: "a + (-b) = a - b",
+        original: subExpr,
+        transformed: `${fmt(a)} - ${fmt(Math.abs(b))}`,
+        computeTitle: "Efetuar a subtração",
+        computeOp: "-",
+        computeA: a,
+        computeB: Math.abs(b),
+      };
+    }
+    return undefined;
+  }
+
+  function reduceOnce(root: Node): {
+    newRoot: Node;
+    subExpr: string;
+    op: string;
+    a: number;
+    b: number;
+    res: number;
+  } | null {
+    function rec(n: Node): {
+      node: Node;
+      step?: { subExpr: string; op: string; a: number; b: number; res: number };
+    } {
+      if (n.type === "number") return { node: n };
+      if (n.type === "unary") {
+        const operandRes = rec(n.operand);
+        n.operand = operandRes.node;
+        if (operandRes.step) return { node: n, step: operandRes.step };
+        if (n.operand.type === "number") {
+          const a = n.operand.value;
+          const res = n.op === "-" ? -a : a;
+          const subExpr = treeToString(n);
+          return {
+            node: { type: "number", value: res },
+            step: { subExpr, op: n.op, a, b: 0, res },
+          };
+        }
+        return { node: n };
+      }
+      const leftRes = rec(n.left);
+      n.left = leftRes.node;
+      if (leftRes.step) return { node: n, step: leftRes.step };
+      const rightRes = rec(n.right);
+      n.right = rightRes.node;
+      if (rightRes.step) return { node: n, step: rightRes.step };
+      if (n.left.type === "number" && n.right.type === "number") {
+        const a = n.left.value;
+        const b = n.right.value;
+        const res = compute(n.op, a, b);
+        const subExpr = treeToString(n);
+        return {
+          node: { type: "number", value: res },
+          step: { subExpr, op: n.op, a, b, res },
+        };
+      }
+      return { node: n };
+    }
+    const r = rec(root);
+    if (r.step) return { newRoot: r.node, ...r.step };
+    return null;
+  }
+
   try {
-    const result = Function(`"use strict"; return (${cleaned})`)();
-    if (typeof result !== "number" || !Number.isFinite(result)) {
+    const tokens = tokenize(cleaned);
+    if (tokens.length === 0) throw new Error("empty");
+    const ast = parseExpression(tokens);
+    const steps: string[] = [];
+    steps.push(stepHeader(1, "Expressão"));
+    steps.push(expression);
+
+    let current: Node = ast;
+    let stepNumber = 2;
+    while (true) {
+      const red = reduceOnce(current);
+      if (!red) break;
+
+      const signInfo = signRuleInfo(red.op, red.a, red.b, red.subExpr);
+      if (signInfo) {
+        steps.push(stepHeader(stepNumber, signInfo.identifyTitle));
+        steps.push(signInfo.identifyText);
+        stepNumber++;
+        steps.push(stepHeader(stepNumber, signInfo.ruleTitle));
+        steps.push(signInfo.ruleText);
+        steps.push(signInfo.original);
+        steps.push(signInfo.transformed);
+        stepNumber++;
+      }
+
+      const title =
+        red.subExpr.startsWith("(") && red.subExpr.endsWith(")")
+          ? "Resolver o parêntese"
+          : signInfo
+            ? signInfo.computeTitle
+            : opName(red.op);
+      steps.push(stepHeader(stepNumber, title));
+      const opUsed = signInfo ? signInfo.computeOp : red.op;
+      const aUsed = signInfo ? signInfo.computeA : red.a;
+      const bUsed = signInfo ? signInfo.computeB : red.b;
+      const sym = opUsed === "*" ? "×" : opUsed === "/" ? "÷" : opUsed;
+      steps.push(
+        `Operação: ${opName(opUsed)} (${fmt(aUsed)} ${sym} ${fmt(bUsed)})`,
+      );
+      const expl =
+        title === "Resolver o parêntese"
+          ? `Aqui resolvemos a expressão dentro do parêntese: ${red.subExpr} = ${fmt(red.res)}`
+          : `Realizamos a operação ${fmt(aUsed)} ${sym} ${fmt(bUsed)} = ${fmt(red.res)}`;
+      steps.push(`Explicação: ${expl}`);
+      steps.push(`Resultado: ${fmt(red.res)}`);
+      current = red.newRoot;
+      steps.push(`Expressão atual: ${treeToString(current)}`);
+      stepNumber++;
+    }
+
+    if (current.type !== "number") {
       return {
         ok: false,
         title: "Erro",
-        value: "Expressão inválida.",
+        value: "Não foi possível avaliar completamente.",
         steps: [],
       };
     }
-    const steps: string[] = [];
-    steps.push(stepHeader(1, "Expressão"));
-    steps.push(`${expression}`);
-    steps.push(stepHeader(2, "Avaliar a expressão"));
-    steps.push(`${expression} = ${fmt(result)}`);
-    return { ok: true, title: "Resultado", value: fmt(result), steps };
-  } catch (error) {
+    steps.push(stepHeader(stepNumber, "Resultado final"));
+    steps.push(fmt(current.value));
+    return { ok: true, title: "Resultado", value: fmt(current.value), steps };
+  } catch (err) {
     return {
       ok: false,
       title: "Erro",
