@@ -274,6 +274,7 @@ export function solveExponential(a: number, b: number): SolverResult {
 
 export function solveCalculator(expression: string): SolverResult {
   const cleaned = expression.replace(/×/g, "*").replace(/÷/g, "/").trim();
+
   if (!cleaned) {
     return {
       ok: false,
@@ -313,7 +314,10 @@ export function solveCalculator(expression: string): SolverResult {
     const isUnaryContext = () =>
       tokens.length === 0 ||
       tokens[tokens.length - 1] === "(" ||
-      /[+\-*/]/.test(tokens[tokens.length - 1]);
+      tokens[tokens.length - 1] === "+" ||
+      tokens[tokens.length - 1] === "-" ||
+      tokens[tokens.length - 1] === "*" ||
+      tokens[tokens.length - 1] === "/";
 
     while (i < s.length) {
       const ch = s[i];
