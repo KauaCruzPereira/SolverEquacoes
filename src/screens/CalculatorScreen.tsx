@@ -55,12 +55,6 @@ export default function CalculatorScreen({ onShowResult }: ScreenProps) {
     setResult(r);
   };
 
-  const handlePreset = (item: string) => {
-    setExpression(item);
-    const r = solveCalculator(item);
-    setResult(r);
-  };
-
   return (
     <View style={styles.container}>
       <SectionCard label="Calculadora básica">
