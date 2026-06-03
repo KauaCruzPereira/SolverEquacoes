@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   StatusBar,
   Platform,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import { TabBar, TabId } from "./src/components";
 import { colors, spacing, radius } from "./src/theme";
@@ -55,6 +56,45 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("calc");
   const scrollRef = useRef<React.ElementRef<typeof ScrollView> | null>(null);
   const [chatVisible, setChatVisible] = useState(false);
+  const [hintVisible, setHintVisible] = useState(false);
+  const animX = React.useRef(new Animated.Value(40)).current;
+
+  useEffect(() => {
+    let showTimeout: NodeJS.Timeout | null = null;
+    let hideTimeout: NodeJS.Timeout | null = null;
+
+    const schedule = () => {
+      const delay = 4000 + Math.random() * 6000;
+      showTimeout = setTimeout(() => {
+        setHintVisible(true);
+        // animate in
+        animX.setValue(40);
+        Animated.timing(animX, {
+          toValue: 0,
+          duration: 420,
+          useNativeDriver: true,
+        }).start();
+
+        hideTimeout = setTimeout(() => {
+          Animated.timing(animX, {
+            toValue: 40,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => setHintVisible(false));
+        }, 5000);
+
+        schedule();
+      }, delay);
+    };
+
+    schedule();
+
+    return () => {
+      if (showTimeout) clearTimeout(showTimeout);
+      if (hideTimeout) clearTimeout(hideTimeout);
+      animX.stopAnimation();
+    };
+  }, [animX]);
 
   const handleShowResult = () => {
     requestAnimationFrame(() => {
@@ -85,6 +125,26 @@ export default function App() {
         {SCREENS[activeTab]({ onShowResult: handleShowResult })}
         <View style={{ height: spacing.xxl }} />
       </ScrollView>
+
+      {hintVisible && (
+        <Animated.View
+          style={[
+            styles.hintBubble,
+            {
+              transform: [{ translateX: animX }],
+              opacity: animX.interpolate({
+                inputRange: [0, 40],
+                outputRange: [1, 0],
+              }),
+            },
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={styles.hintText}>Dúvidas? Nossa IA pode ajudar!</Text>
+
+          <View style={styles.hintArrow} />
+        </Animated.View>
+      )}
 
       <TouchableOpacity
         style={styles.cornerDot}
@@ -159,5 +219,45 @@ const styles = StyleSheet.create({
     elevation: 4,
     borderWidth: 3,
     borderColor: colors.border,
+  },
+  hintBubble: {
+    position: "absolute",
+
+    right: spacing.lg + 70,
+    bottom: spacing.lg + 10, 
+
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.lg,
+
+    borderWidth: 1,
+    borderColor: colors.border,
+
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+
+    zIndex: 20,
+  },
+  hintText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  hintArrow: {
+    position: "absolute",
+    right: -4,
+    top: "50%",
+    marginTop: -6,
+
+    width: 12,
+    height: 12,
+
+    backgroundColor: colors.primary,
+
+    transform: [{ rotate: "45deg" }],
   },
 });
