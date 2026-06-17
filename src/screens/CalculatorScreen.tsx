@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Btn, ResultBox, SectionCard } from "../components";
+import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
+import { Btn, ResultBox, ResultsText, SectionCard } from "../components";
 import { solveCalculator, SolverResult } from "../solvers";
 import { colors, radius, spacing, typography } from "../theme";
 
@@ -18,6 +18,8 @@ const BUTTON_ROWS = [
 export default function CalculatorScreen({ onShowResult }: ScreenProps) {
   const [expression, setExpression] = useState("0");
   const [result, setResult] = useState<SolverResult | null>(null);
+  const { width } = useWindowDimensions();
+  const isLarge = width >= 900;
 
   useEffect(() => {
     if (result) onShowResult?.();
@@ -52,39 +54,54 @@ export default function CalculatorScreen({ onShowResult }: ScreenProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <SectionCard label="Calculadora básica">
-        <View style={styles.displayCard}>
-          <Text style={styles.displayExpression}>{expression}</Text>
-        </View>
-
-        <View style={styles.buttonGrid}>
-          {BUTTON_ROWS.map((row, rowIndex) => (
-            <View key={rowIndex} style={styles.buttonRow}>
-              {row.map((label) => (
-                <Btn
-                  key={label}
-                  label={label}
-                  onPress={() => append(label)}
-                  flex={1}
-                />
-              ))}
-            </View>
-          ))}
-          <View style={styles.buttonRow}>
-            <Btn label="C" variant="secondary" onPress={handleClear} flex={1} />
-            <Btn
-              label="DEL"
-              variant="secondary"
-              onPress={handleDelete}
-              flex={1}
-            />
-            <Btn label="=" onPress={handleEvaluate} flex={2} />
+    <View style={[styles.container, isLarge && styles.rowContainer]}>
+      <View style={isLarge ? styles.leftPane : undefined}>
+        <SectionCard label="Calculadora básica">
+          <View style={styles.displayCard}>
+            <Text style={styles.displayExpression}>{expression}</Text>
           </View>
-        </View>
-      </SectionCard>
 
-      <ResultBox result={result} />
+          <View style={styles.buttonGrid}>
+            {BUTTON_ROWS.map((row, rowIndex) => (
+              <View key={rowIndex} style={styles.buttonRow}>
+                {row.map((label) => (
+                  <Btn
+                    key={label}
+                    label={label}
+                    onPress={() => append(label)}
+                    flex={1}
+                  />
+                ))}
+              </View>
+            ))}
+            <View style={styles.buttonRow}>
+              <Btn
+                label="C"
+                variant="secondary"
+                onPress={handleClear}
+                flex={1}
+              />
+              <Btn
+                label="DEL"
+                variant="secondary"
+                onPress={handleDelete}
+                flex={1}
+              />
+              <Btn label="=" onPress={handleEvaluate} flex={2} />
+            </View>
+          </View>
+        </SectionCard>
+      </View>
+
+      <View style={isLarge ? styles.rightPane : undefined}>
+        {result ? (
+          <ResultBox result={result} />
+        ) : (
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <ResultsText/>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -118,5 +135,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.md,
+  },
+  leftPane: {
+    flex: 0.4,
+    marginRight: spacing.md,
+  },
+  rightPane: {
+    flex: 0.6,
   },
 });

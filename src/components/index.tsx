@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardTypeOptions,
   Dimensions,
+  Animated,
 } from "react-native";
 import { colors, spacing, radius, typography } from "../theme";
 import { SolverResult } from "../solvers";
@@ -21,7 +22,7 @@ interface InputFieldProps {
 }
 
 const screenWidth = Dimensions.get("window").width;
-const BUTTON_FONT_SIZE = Math.min(16, Math.max(12, screenWidth * 0.050));
+const BUTTON_FONT_SIZE = Math.min(16, Math.max(12, screenWidth * 0.05));
 
 export function InputField({
   label,
@@ -79,12 +80,39 @@ export function Btn({ label, onPress, variant = "primary", flex }: BtnProps) {
 }
 
 export function ResultBox({ result }: { result: SolverResult | null }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(8)).current;
+
+  useEffect(() => {
+    if (result) {
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      opacity.setValue(0);
+      translateY.setValue(8);
+    }
+  }, [result, opacity, translateY]);
+
   if (!result) return null;
   const isOk = result.ok;
 
   return (
-    <View
-      style={[styles.resultBox, isOk ? styles.resultOk : styles.resultError]}
+    <Animated.View
+      style={[
+        styles.resultBox,
+        isOk ? styles.resultOk : styles.resultError,
+        { opacity, transform: [{ translateY }] },
+      ]}
     >
       <Text
         style={[
@@ -113,7 +141,7 @@ export function ResultBox({ result }: { result: SolverResult | null }) {
           ))}
         </View>
       )}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -184,6 +212,16 @@ export function TabBar({ active, onChange }: TabBarProps) {
         </TouchableOpacity>
       ))}
     </ScrollView>
+  );
+}
+
+export function ResultsText() {
+  return (
+    <View style={styles.resultsText}>
+      <Text style={{ color: colors.textSecondary }}>
+        Resultados aparecerão aqui.
+      </Text>
+    </View>
   );
 }
 
@@ -363,4 +401,5 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: colors.tabActiveText,
   },
+  resultsText: {},
 });

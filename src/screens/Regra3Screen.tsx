@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput } from "react-native";
-import { Btn, ResultBox, SectionCard } from "../components";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  useWindowDimensions,
+} from "react-native";
+import { Btn, ResultBox, ResultsText, SectionCard } from "../components";
 import { solveRegra3, SolverResult } from "../solvers";
 import { colors, spacing, radius } from "../theme";
 
@@ -25,61 +31,75 @@ export default function Regra3Screen({ onShowResult }: ScreenProps) {
     if (r.ok) setX(r.value.replace("x = ", ""));
   };
 
+  const { width } = useWindowDimensions();
+  const isLarge = width >= 900;
+
   return (
-    <View style={styles.container}>
-      <SectionCard label="Regra de 3 simples">
-        <View style={styles.grid}>
-          <View style={styles.cell}>
-            <Text style={styles.cellLabel}>A</Text>
-            <TextInput
-              style={styles.input}
-              value={a}
-              onChangeText={setA}
-              keyboardType="numeric"
-              placeholderTextColor={colors.textMuted}
+    <View style={[styles.container, isLarge && styles.rowContainer]}>
+      <View style={isLarge ? styles.leftPane : undefined}>
+        <SectionCard label="Regra de 3 simples">
+          <View style={styles.grid}>
+            <View style={styles.cell}>
+              <Text style={styles.cellLabel}>A</Text>
+              <TextInput
+                style={styles.input}
+                value={a}
+                onChangeText={setA}
+                keyboardType="numeric"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+            <View style={styles.cell}>
+              <Text style={styles.cellLabel}>B</Text>
+              <TextInput
+                style={styles.input}
+                value={b}
+                onChangeText={setB}
+                keyboardType="numeric"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+            <View style={styles.cell}>
+              <Text style={styles.cellLabel}>C</Text>
+              <TextInput
+                style={styles.input}
+                value={c}
+                onChangeText={setC}
+                keyboardType="numeric"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+            <View style={styles.cell}>
+              <Text style={styles.cellLabel}>x = ?</Text>
+              <TextInput
+                style={[styles.input, styles.inputResult]}
+                value={x}
+                editable={false}
+              />
+            </View>
+          </View>
+          <Text style={styles.description}>Se A → B, então C → x</Text>
+          <View style={styles.btnRow}>
+            <Btn label="Direta" onPress={() => solve("dir")} flex={1} />
+            <Btn
+              label="Inversa"
+              variant="secondary"
+              onPress={() => solve("inv")}
+              flex={1}
             />
           </View>
-          <View style={styles.cell}>
-            <Text style={styles.cellLabel}>B</Text>
-            <TextInput
-              style={styles.input}
-              value={b}
-              onChangeText={setB}
-              keyboardType="numeric"
-              placeholderTextColor={colors.textMuted}
-            />
+        </SectionCard>
+      </View>
+
+      <View style={isLarge ? styles.rightPane : undefined}>
+        {result ? (
+          <ResultBox result={result} />
+        ) : (
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <ResultsText />
           </View>
-          <View style={styles.cell}>
-            <Text style={styles.cellLabel}>C</Text>
-            <TextInput
-              style={styles.input}
-              value={c}
-              onChangeText={setC}
-              keyboardType="numeric"
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
-          <View style={styles.cell}>
-            <Text style={styles.cellLabel}>x = ?</Text>
-            <TextInput
-              style={[styles.input, styles.inputResult]}
-              value={x}
-              editable={false}
-            />
-          </View>
-        </View>
-        <Text style={styles.description}>Se A → B, então C → x</Text>
-        <View style={styles.btnRow}>
-          <Btn label="Direta" onPress={() => solve("dir")} flex={1} />
-          <Btn
-            label="Inversa"
-            variant="secondary"
-            onPress={() => solve("inv")}
-            flex={1}
-          />
-        </View>
-      </SectionCard>
-      <ResultBox result={result} />
+        )}{" "}
+      </View>
     </View>
   );
 }
@@ -126,5 +146,17 @@ const styles = StyleSheet.create({
   btnRow: {
     flexDirection: "row",
     gap: spacing.sm,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.md,
+  },
+  leftPane: {
+    flex: 0.4,
+    marginRight: spacing.md,
+  },
+  rightPane: {
+    flex: 0.6,
   },
 });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { InputField, Btn, ResultBox, SectionCard } from "../components";
+import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
+import { InputField, Btn, ResultBox, SectionCard, ResultsText } from "../components";
 import { solveLinear, SolverResult } from "../solvers";
 import { colors, spacing } from "../theme";
 
@@ -25,36 +25,52 @@ export default function LinearScreen({ onShowResult }: ScreenProps) {
     return `${av}x ${bSign} ${b || "b"} = ${c || "c"}`;
   };
 
+  const { width } = useWindowDimensions();
+  const isLarge = width >= 900;
+
   return (
-    <View style={styles.container}>
-      <SectionCard label="Equação de 1º grau">
-        <InputField
-          label="a"
-          value={a}
-          onChangeText={setA}
-          placeholder="coef. de x"
-        />
-        <InputField
-          label="b"
-          value={b}
-          onChangeText={setB}
-          placeholder="constante"
-        />
-        <InputField
-          label="c"
-          value={c}
-          onChangeText={setC}
-          placeholder="resultado"
-        />
-        <Text style={styles.preview}>{preview()}</Text>
-        <Btn
-          label="Resolver"
-          onPress={() =>
-            setResult(solveLinear(parseFloat(a), parseFloat(b), parseFloat(c)))
-          }
-        />
-      </SectionCard>
-      <ResultBox result={result} />
+    <View style={[styles.container, isLarge && styles.rowContainer]}>
+      <View style={isLarge ? styles.leftPane : undefined}>
+        <SectionCard label="Equação de 1º grau">
+          <InputField
+            label="a"
+            value={a}
+            onChangeText={setA}
+            placeholder="coef. de x"
+          />
+          <InputField
+            label="b"
+            value={b}
+            onChangeText={setB}
+            placeholder="constante"
+          />
+          <InputField
+            label="c"
+            value={c}
+            onChangeText={setC}
+            placeholder="resultado"
+          />
+          <Text style={styles.preview}>{preview()}</Text>
+          <Btn
+            label="Resolver"
+            onPress={() =>
+              setResult(
+                solveLinear(parseFloat(a), parseFloat(b), parseFloat(c)),
+              )
+            }
+          />
+        </SectionCard>
+      </View>
+
+      <View style={isLarge ? styles.rightPane : undefined}>
+        {result ? (
+          <ResultBox result={result} />
+        ) : (
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <ResultsText />
+          </View>
+        )}{" "}
+      </View>
     </View>
   );
 }
@@ -68,5 +84,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textSecondary,
     marginBottom: spacing.md,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.md,
+  },
+  leftPane: {
+    flex: 0.4,
+    marginRight: spacing.md,
+  },
+  rightPane: {
+    flex: 0.6,
   },
 });

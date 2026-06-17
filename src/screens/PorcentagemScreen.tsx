@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput } from "react-native";
-import { Btn, ResultBox, SectionCard } from "../components";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  useWindowDimensions,
+} from "react-native";
+import { Btn, ResultBox, ResultsText, SectionCard } from "../components";
 import { solvePorcentagem, SolverResult } from "../solvers";
 import { colors, spacing, radius } from "../theme";
 
@@ -17,62 +23,76 @@ export default function PorcentagemScreen({ onShowResult }: ScreenProps) {
     if (result) onShowResult?.();
   }, [result, onShowResult]);
 
+  const { width } = useWindowDimensions();
+  const isLarge = width >= 900;
+
   return (
-    <View style={styles.container}>
-      <SectionCard label="Calcular Porcentagem">
-        <View style={styles.row}>
-          <TextInput
-            style={styles.input}
-            value={val}
-            onChangeText={setVal}
-            placeholder="valor"
-            placeholderTextColor={colors.textMuted}
-            keyboardType="numeric"
-          />
-          <Text style={styles.sep}>×</Text>
-          <TextInput
-            style={styles.input}
-            value={pct}
-            onChangeText={setPct}
-            placeholder="%"
-            placeholderTextColor={colors.textMuted}
-            keyboardType="numeric"
-          />
-          <Text style={styles.sep}>%</Text>
-        </View>
-        <View style={styles.btnRow}>
-          <Btn
-            label="X% de Y"
-            onPress={() =>
-              setResult(
-                solvePorcentagem(parseFloat(val), parseFloat(pct), "of"),
-              )
-            }
-            flex={1}
-          />
-          <Btn
-            label="Adicionar %"
-            variant="secondary"
-            onPress={() =>
-              setResult(
-                solvePorcentagem(parseFloat(val), parseFloat(pct), "add"),
-              )
-            }
-            flex={1}
-          />
-          <Btn
-            label="Subtrair %"
-            variant="secondary"
-            onPress={() =>
-              setResult(
-                solvePorcentagem(parseFloat(val), parseFloat(pct), "sub"),
-              )
-            }
-            flex={1}
-          />
-        </View>
-      </SectionCard>
-      <ResultBox result={result} />
+    <View style={[styles.container, isLarge && styles.rowContainer]}>
+      <View style={isLarge ? styles.leftPane : undefined}>
+        <SectionCard label="Calcular Porcentagem">
+          <View style={styles.row}>
+            <TextInput
+              style={styles.input}
+              value={val}
+              onChangeText={setVal}
+              placeholder="valor"
+              placeholderTextColor={colors.textMuted}
+              keyboardType="numeric"
+            />
+            <Text style={styles.sep}>×</Text>
+            <TextInput
+              style={styles.input}
+              value={pct}
+              onChangeText={setPct}
+              placeholder="%"
+              placeholderTextColor={colors.textMuted}
+              keyboardType="numeric"
+            />
+            <Text style={styles.sep}>%</Text>
+          </View>
+          <View style={styles.btnRow}>
+            <Btn
+              label="X% de Y"
+              onPress={() =>
+                setResult(
+                  solvePorcentagem(parseFloat(val), parseFloat(pct), "of"),
+                )
+              }
+              flex={1}
+            />
+            <Btn
+              label="Adicionar %"
+              variant="secondary"
+              onPress={() =>
+                setResult(
+                  solvePorcentagem(parseFloat(val), parseFloat(pct), "add"),
+                )
+              }
+              flex={1}
+            />
+            <Btn
+              label="Subtrair %"
+              variant="secondary"
+              onPress={() =>
+                setResult(
+                  solvePorcentagem(parseFloat(val), parseFloat(pct), "sub"),
+                )
+              }
+              flex={1}
+            />
+          </View>
+        </SectionCard>
+      </View>
+
+      <View style={isLarge ? styles.rightPane : undefined}>
+        {result ? (
+          <ResultBox result={result} />
+        ) : (
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <ResultsText />
+          </View>
+        )}{" "}
+      </View>
     </View>
   );
 }
@@ -108,5 +128,17 @@ const styles = StyleSheet.create({
   btnRow: {
     flexDirection: "row",
     gap: spacing.sm,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.md,
+  },
+  leftPane: {
+    flex: 0.4,
+    marginRight: spacing.md,
+  },
+  rightPane: {
+    flex: 0.6,
   },
 });
