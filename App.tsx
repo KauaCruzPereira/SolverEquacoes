@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -96,11 +96,11 @@ export default function App() {
     };
   }, [animX]);
 
-  const handleShowResult = () => {
+  const handleShowResult = useCallback(() => {
     requestAnimationFrame(() => {
       scrollRef.current?.scrollToEnd({ animated: true });
     });
-  };
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     position: "absolute",
 
     right: spacing.lg + 70,
-    bottom: spacing.lg + 10, 
+    bottom: spacing.lg + 10,
 
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.md,
