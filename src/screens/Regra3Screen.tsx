@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   inputResult: {
-    backgroundColor: "#E6F1FB",
-    borderColor: "#B5D4F4",
+    backgroundColor: "#501c2f52",
+    borderColor: "#501c2fa9",
   },
   description: {
     fontSize: 13,

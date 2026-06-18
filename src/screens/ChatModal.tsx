@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { colors, spacing, radius, typography } from "../theme";
 import ChatBotIcon from "../assets/svg/chatbot";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface Message {
   id: string;
@@ -144,7 +145,10 @@ export default function ChatModal({
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.container}>
+        <LinearGradient
+          colors={["#F7F1EB", "#EFE5DC", "#E6D8CC"]}
+          style={{ flex: 1 }}
+        >
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.avatarDot}>
@@ -241,7 +245,7 @@ export default function ChatModal({
               <Text style={styles.sendBtnText}>↑</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </LinearGradient>
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -310,16 +314,16 @@ const styles = StyleSheet.create({
   contextPill: {
     marginHorizontal: spacing.lg,
     marginTop: spacing.md,
-    backgroundColor: "#EFF6FF",
+    backgroundColor: "#501c2f3a",
     borderWidth: 1,
-    borderColor: "#BFDBFE",
+    borderColor: "#501c2fbb",
     borderRadius: radius.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   contextText: {
     fontSize: 12,
-    color: "#1D4ED8",
+    color: "#8a2b2b",
   },
   messages: {
     flex: 1,

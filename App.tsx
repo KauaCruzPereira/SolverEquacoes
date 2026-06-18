@@ -1,29 +1,29 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  SafeAreaView,
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  StatusBar,
-  Platform,
-  TouchableOpacity,
   Animated,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { TabBar, TabId } from "./src/components";
-import { colors, spacing, radius } from "./src/theme";
+import { colors, radius, spacing } from "./src/theme";
 
+import Sparkles from "./src/assets/svg/sparkles";
+import CalculatorScreen from "./src/screens/CalculatorScreen";
+import ChatModal from "./src/screens/ChatModal";
+import ExponentialScreen from "./src/screens/ExponentialScreen";
 import LinearScreen from "./src/screens/LinearScreen";
-import QuadraticScreen from "./src/screens/QuadraticScreen";
-import SistemaScreen from "./src/screens/SistemaScreen";
 import PAScreen from "./src/screens/PAScreen";
 import PGScreen from "./src/screens/PGScreen";
-import ExponentialScreen from "./src/screens/ExponentialScreen";
 import PorcentagemScreen from "./src/screens/PorcentagemScreen";
+import QuadraticScreen from "./src/screens/QuadraticScreen";
 import Regra3Screen from "./src/screens/Regra3Screen";
-import CalculatorScreen from "./src/screens/CalculatorScreen";
-import Sparkles from "./src/assets/svg/sparkles";
-import ChatModal from "./src/screens/ChatModal";
+import SistemaScreen from "./src/screens/SistemaScreen";
+import { LinearGradient } from "expo-linear-gradient";
 
 const TAB_CONTEXT: Record<TabId, string> = {
   calc: "O usuário está usando a calculadora básica com expressões matemáticas.",
@@ -103,7 +103,10 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <LinearGradient
+      colors={["#F7F1EB", "#EFE5DC", "#E6D8CC"]}
+      style={{ flex: 1 }}
+    >
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       <View style={styles.header}>
@@ -158,15 +161,11 @@ export default function App() {
         onClose={() => setChatVisible(false)}
         mathContext={TAB_CONTEXT[activeTab]}
       />
-    </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   header: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 3,
-    borderColor: colors.border,
+    borderColor: "white",
   },
   hintBubble: {
     position: "absolute",
