@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
 import { Btn, ResultBox, ResultsText, SectionCard } from "../components";
 import { solveCalculator, SolverResult } from "../solvers";
@@ -24,6 +24,66 @@ export default function CalculatorScreen({ onShowResult }: ScreenProps) {
   useEffect(() => {
     if (result) onShowResult?.();
   }, [result, onShowResult]);
+
+  const exprRef = useRef(expression);
+  useEffect(() => {
+    exprRef.current = expression;
+  }, [expression]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const key = e.key;
+      let handled = false;
+
+      if (/^[0-9]$/.test(key)) {
+        setExpression((prev) => {
+          if (prev === "0") return key;
+          return prev + key;
+        });
+        setResult(null);
+        handled = true;
+      } else if (key === ".") {
+        setExpression((prev) => (prev === "0" ? "0." : prev + "."));
+        setResult(null);
+        handled = true;
+      } else if (key === "+" || key === "-") {
+        setExpression((prev) => (prev === "0" ? key : prev + key));
+        setResult(null);
+        handled = true;
+      } else if (key === "*") {
+        setExpression((prev) => (prev === "0" ? "×" : prev + "×"));
+        setResult(null);
+        handled = true;
+      } else if (key === "/") {
+        setExpression((prev) => (prev === "0" ? "÷" : prev + "÷"));
+        setResult(null);
+        handled = true;
+      } else if (key === "(" || key === ")") {
+        setExpression((prev) => (prev === "0" ? key : prev + key));
+        setResult(null);
+        handled = true;
+      } else if (key === "Enter" || key === "=") {
+        const r = solveCalculator(exprRef.current);
+        setResult(r);
+        handled = true;
+      } else if (key === "Backspace") {
+        setExpression((prev) => (prev.length <= 1 ? "0" : prev.slice(0, -1)));
+        setResult(null);
+        handled = true;
+      } else if (key === "Escape" || key.toLowerCase() === "c") {
+        setExpression("0");
+        setResult(null);
+        handled = true;
+      }
+
+      if (handled && typeof e.preventDefault === "function") e.preventDefault();
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", handler);
+      return () => window.removeEventListener("keydown", handler);
+    }
+  }, []);
 
   const append = (value: string) => {
     setExpression((prev) => {
@@ -98,7 +158,7 @@ export default function CalculatorScreen({ onShowResult }: ScreenProps) {
           <ResultBox result={result} />
         ) : (
           <View style={{ flex: 1, alignItems: "center" }}>
-            <ResultsText/>
+            <ResultsText />
           </View>
         )}
       </View>
