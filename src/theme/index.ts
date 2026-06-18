@@ -16,7 +16,7 @@ export const colors = {
   errorText: "#991B1B",
   tabActiveBg: "#600324",
   tabActiveText: "#FFFFFF",
-  inputBg: "#fcf8f848",
+  inputBg: "#fcf8f8",
 };
 
 export const spacing = {
