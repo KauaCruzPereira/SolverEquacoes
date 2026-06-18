@@ -14,7 +14,7 @@ export const colors = {
   errorBg: "#FEF2F2",
   errorBorder: "#FECACA",
   errorText: "#991B1B",
-  tabActiveBg: "#334E68",
+  tabActiveBg: "#600324"
   tabActiveText: "#FFFFFF",
   inputBg: "#F8FAFC",
 };
